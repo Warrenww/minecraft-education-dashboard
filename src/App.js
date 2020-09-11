@@ -1,19 +1,17 @@
 import React, {useState} from 'react';
-import logo from './logo.svg';
 import './App.css';
 import styled from 'styled-components';
-import TextField from '@material-ui/core/TextField';
-import InputBase from '@material-ui/core/InputBase';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Collapse from '@material-ui/core/Collapse';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import Button from '@material-ui/core/Button';
+import {
+  DirectionSelect,
+  RotationSelect,
+  FileChooser,
+  NumberInput,
+} from './Input';
 import {
   agentInspectBlock,
   agentInspectData,
@@ -21,35 +19,12 @@ import {
   build,
 } from './API';
 
-const DirectionSelect = (value, setValue) => (
-  <FormControl style={{flex: 1, margin: '0 10px'}}>
-    <InputLabel>Direction</InputLabel>
-    <Select
-      value={value}
-      onChange={e => setValue(e.target.value)}
-    >
-      <MenuItem value='forward'>forward</MenuItem>
-      <MenuItem value='left'>left</MenuItem>
-      <MenuItem value='right'>right</MenuItem>
-      <MenuItem value='back'>back</MenuItem>
-      <MenuItem value='up'>up</MenuItem>
-      <MenuItem value='down'>down</MenuItem>
-    </Select>
-  </FormControl>
-);
+const styles = {
+  executeButton: {
+    alignSelf: 'center',
+  },
 
-const FileChooser = (value, setValue) => (
-  <FormControl style={{flex: 1, margin: '0 10px'}}>
-    <InputBase
-      defaultValue=""
-      onChange={e => setValue(e.target.files[0])}
-      inputProps={{
-        accept: '.json',
-        type:'file',
-      }}
-    />
-  </FormControl>
-)
+}
 
 const Content = styled.div`
   display: flex;
@@ -63,6 +38,7 @@ const Content = styled.div`
     display: flex;
     justify-content: space-around;
     align-items: baseline;
+    flex-direction: column;
   }
   .MuiCard-root {
     width: 300px;
@@ -83,11 +59,23 @@ const Content = styled.div`
 const CommandBlock = props => {
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState(<></>);
-  const [inputValue, setInputValue] = useState(props.defaultValue || "");
+  const [inputValue, setInputValue] = useState(
+    props.label.map((x,i) => {
+      return {
+        key: x,
+        value: props.defaultValue[i]
+      }
+    }).reduce((acc, curr, idx) => {
+      return {...acc, [curr.key]: curr.value}
+    }, {})
+  );
 
   const resultCallback = (res) => {
     setResult(res);
     setShowResult(true);
+  }
+  const handleValue = (key) => {
+    return (value) => setInputValue({...inputValue, [key]:value})
   }
 
   return (
@@ -97,8 +85,18 @@ const CommandBlock = props => {
         <div>{props.description}</div>
       </CardContent>
       <CardActions>
-        {props.inputArea(inputValue, setInputValue)}
-        <Button variant="contained" onClick={_ => props.action({[props.label]: inputValue}, resultCallback)}>Execute</Button>
+        {
+          props.inputArea.map((child, i) =>
+            child(inputValue[props.label[i]], handleValue(props.label[i]), props.label[i])
+          )
+        }
+        <Button
+          variant="contained"
+          style={styles.executeButton}
+          onClick={
+            _ => props.action(inputValue, resultCallback)
+          }
+        >Execute</Button>
       </CardActions>
       <Collapse in={showResult}>
         {result}
@@ -115,43 +113,33 @@ function App() {
           title="Agen Inspet Block"
           description="Ask agent inspect [direction], return block name"
           action={agentInspectBlock}
-          defaultValue='forward'
-          label='Direction'
-          inputArea={DirectionSelect}
+          defaultValue={['forward']}
+          label={['Direction']}
+          inputArea={[DirectionSelect]}
         />
         <CommandBlock
           title="Agen Inspet Data"
           description="Ask agent inspect [direction], return block data"
           action={agentInspectData}
-          defaultValue='forward'
-          label='Direction'
-          inputArea={DirectionSelect}
+          defaultValue={['forward']}
+          label={['Direction']}
+          inputArea={[DirectionSelect]}
         />
         <CommandBlock
           title="Scan"
           description="Scan the structure from your position with [size]"
           action={scan}
-          defaultValue='10'
-          label='Size'
-          inputArea={
-            (v, sv) => (
-            <TextField
-              label="Size"
-              value={v}
-              onChange={e => sv(e.target.value)}
-              type='number'
-              variant="outlined"
-              size="small"
-            />
-          )}
+          defaultValue={['10', '10', '10']}
+          label={['SizeX', 'SizeY', 'SizeZ']}
+          inputArea={[NumberInput, NumberInput, NumberInput]}
         />
         <CommandBlock
           title="Build"
           description="Build the structure from your position with recipe [file]"
           action={build}
-          defaultValue=''
-          label='File'
-          inputArea={FileChooser}
+          defaultValue={['', 0]}
+          label={['File', 'Rotate']}
+          inputArea={[FileChooser, RotationSelect]}
         />
       </Content>
     </div>
