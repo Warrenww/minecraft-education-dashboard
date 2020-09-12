@@ -203,9 +203,32 @@ const agentInspectData = (args, callback) => {
      )
 }
 
+const bounding = async (args, callback) => {
+  const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
+  await resetAgentPosition()
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~${parseInt(sizeX) + 1}~-1~ stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+
+  callback(<div>Done.</div>);
+}
+
 export {
   agentInspectBlock,
   agentInspectData,
   scan,
   build,
+  bounding,
 };

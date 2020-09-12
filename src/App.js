@@ -17,6 +17,7 @@ import {
   agentInspectData,
   scan,
   build,
+  bounding,
 } from './API';
 
 const styles = {
@@ -126,10 +127,18 @@ function App() {
           inputArea={[DirectionSelect]}
         />
         <CommandBlock
+          title="Bounding Box"
+          description="Draw a bounding box with given [size]"
+          action={bounding}
+          defaultValue={['3', '3', '3']}
+          label={['SizeX', 'SizeY', 'SizeZ']}
+          inputArea={[NumberInput, NumberInput, NumberInput]}
+        />
+        <CommandBlock
           title="Scan"
           description="Scan the structure from your position with [size]"
           action={scan}
-          defaultValue={['10', '10', '10']}
+          defaultValue={['3', '3', '3']}
           label={['SizeX', 'SizeY', 'SizeZ']}
           inputArea={[NumberInput, NumberInput, NumberInput]}
         />
