@@ -20,6 +20,7 @@ const scan = async (args, callback) => {
   await resetAgentPosition({offsetX: 1, offsetY: -1, offsetZ: 1, facingZ: 1});
   const blocks = [];
   const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
+  await fetch(`http://localhost:8080/tptargettopos?victim=@p&destination=~${parseInt(sizeX / 2)}~${parseInt(sizeY / 2)}~${parseInt(sizeZ / 2)}`);
   let flag_x = 1;
   let flag_z = 1;
   console.time("scan");
@@ -54,7 +55,7 @@ const scan = async (args, callback) => {
 
         blocks.push({
           x: flag_x ? x : sizeX - x - 1,
-          y: sizeY - y - 1,
+          y: y,
           z: flag_z ? z : sizeZ - z - 1,
           block: block.blockName,
           data: data.data,
