@@ -29,6 +29,7 @@ const scan = async (args, callback) => {
       for(let x = 0 ; x < sizeX; x ++){
         x && await fetch(`http://localhost:8080/move?direction=${flag_x?'left':'right'}`);
 
+        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
         const block = await fetch("http://localhost:8080/inspect?direction=up").then(res => res.json()).then(result => result);
         callback(
           <Box position="relative" display="inline-flex">
@@ -50,7 +51,6 @@ const scan = async (args, callback) => {
         if(block.blockName === 'air') continue;
         const data = await fetch("http://localhost:8080/inspectdata?direction=up").then(res => res.json()).then(result => result);
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~~1~ air`);
-        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
 
         blocks.push({
           x: flag_x ? x : sizeX - x - 1,
