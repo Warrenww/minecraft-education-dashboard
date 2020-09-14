@@ -1,12 +1,8 @@
 import React, {useState} from 'react';
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
+import Progress from './Components/Progress'
 
-const sleep = (ms) => new Promise(function(resolve, reject) {
-  setTimeout(resolve, ms);
-});
+const sleep = (ms) => new Promise((resolve, reject) => setTimeout(resolve, ms));
 
 const resetAgentPosition = (args = {}) => {
   const {offsetX, offsetY, offsetZ, facingX, facingZ} = args;
@@ -32,23 +28,7 @@ const scan = async (args, callback) => {
 
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
         const block = await fetch("http://localhost:8080/inspect?direction=up").then(res => res.json()).then(result => result);
-        callback(
-          <Box position="relative" display="inline-flex">
-            <CircularProgress variant="static" value={(y * sizeZ * sizeX + z * sizeX + x) / (sizeX * sizeY * sizeZ) * 100}/>
-            <Box
-              top={0}
-              left={0}
-              bottom={0}
-              right={0}
-              position="absolute"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              {`${Math.round((y * sizeZ * sizeX + z * sizeX + x) / (sizeX * sizeY * sizeZ) * 100 )}%`}
-            </Box>
-          </Box>
-        );
+        callback(<Progress value={(y * sizeZ * sizeX + z * sizeX + x) / (sizeX * sizeY * sizeZ) * 100} />);
         if(block.blockName === 'air') continue;
         const data = await fetch("http://localhost:8080/inspectdata?direction=up").then(res => res.json()).then(result => result);
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~~1~ air`);
@@ -87,7 +67,6 @@ const build = async (args, callback) => {
       reader.readAsText(file);
     });
   }
-
   const rotate = (recipe, deg = 0, x = 1, z = 1) => {
     if(deg === 90) {
       recipe.map((item) => {
@@ -111,30 +90,13 @@ const build = async (args, callback) => {
 
     return recipe;
   }
-
   const slowFetch = (recipe, callback) => {
     return new Promise(async function(resolve, reject) {
       for (var i = 0; i < recipe.length; i++) {
         // console.log(recipe[i]);
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
-        callback(
-          <Box position="relative" display="inline-flex">
-          <CircularProgress variant="static" value={i / recipe.length * 100}/>
-          <Box
-          top={0}
-          left={0}
-          bottom={0}
-          right={0}
-          position="absolute"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          >
-          {`${Math.round( i / recipe.length * 100 )}%`}
-          </Box>
-          </Box>
-        );
-        if(i % 100 === 0) {
+        callback( <Progress value={i / recipe.length * 100} /> );
+        if(i % 500 === 0) {
           await sleep(500);
           // console.clear();
         }
@@ -152,26 +114,10 @@ const build = async (args, callback) => {
   else {
     recipe.forEach(async (item, index) => {
       await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${item.x}~${item.y}~${item.z} ${item.block} ${item.data || 0}`);
-      callback(
-        <Box position="relative" display="inline-flex">
-        <CircularProgress variant="static" value={index / recipe.length * 100}/>
-        <Box
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        position="absolute"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        >
-        {`${Math.round( index / recipe.length * 100 )}%`}
-        </Box>
-        </Box>
-      );
+      callback(<Progress value={index / recipe.length * 100} />);
     });
   }
-  callback('Done.');
+  callback(<Progress value={100} />);
   console.timeEnd("Build");
 }
 
@@ -212,18 +158,44 @@ const bounding = async (args, callback) => {
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  callback(<Progress value={100 / 3} />);
 
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
+  callback(<Progress value={100 / 3 * 2} />);
 
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ stained_glass 14 replace air 0`);
   await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} stained_glass 14 replace air 0`);
 
-  callback(<div>Done.</div>);
+  callback(<Progress value={100} />);
+}
+
+const removeBounding = async (args, callback) => {
+  const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
+  await resetAgentPosition()
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~${parseInt(sizeX) + 1}~-1~ air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~-1~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  callback(<Progress value={100 / 3} />);
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~${parseInt(sizeY)}~ ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  callback(<Progress value={100 / 3 * 2} />);
+
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~ ~~${parseInt(sizeY)}~ air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~~-1~${parseInt(sizeZ) + 1} ~~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~ ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~ air 0 replace stained_glass 14`);
+  await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ fill ~${parseInt(sizeX) + 1}~-1~${parseInt(sizeZ) + 1} ~${parseInt(sizeX) + 1}~${parseInt(sizeY)}~${parseInt(sizeZ) + 1} air 0 replace stained_glass 14`);
+
+  callback(<Progress value={100} />);
 }
 
 export {
@@ -232,4 +204,5 @@ export {
   scan,
   build,
   bounding,
+  removeBounding,
 };
