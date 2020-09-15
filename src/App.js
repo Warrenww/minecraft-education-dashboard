@@ -52,17 +52,12 @@ function App() {
     <div className="App">
       <Content>
         <CommandBlock
-          title={["Agen Inspet Block"]}
-          description={["Ask agent inspect [direction], return block name"]}
-          action={[agentInspectBlock]}
-          defaultValue={['forward']}
-          label={['Direction']}
-          inputArea={[DirectionSelect]}
-        />
-        <CommandBlock
-          title={["Agen Inspet Data"]}
-          description={["Ask agent inspect [direction], return block data"]}
-          action={[agentInspectData]}
+          title={["Agen Inspet Block", "Agen Inspet Data"]}
+          description={[
+            "Ask agent inspect [direction], return block name",
+            "Ask agent inspect [direction], return block data"
+          ]}
+          action={[agentInspectBlock, agentInspectData]}
           defaultValue={['forward']}
           label={['Direction']}
           inputArea={[DirectionSelect]}

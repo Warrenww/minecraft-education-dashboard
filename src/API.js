@@ -68,10 +68,22 @@ const build = async (args, callback) => {
     });
   }
   const rotate = (recipe, deg = 0, x = 1, z = 1) => {
+
+    const rotate_map = [0, 2, 1, 3];
+    const is_need_rotate = (blockName) => {
+      if(blockName.includes('stairs')) return true;
+      if(blockName.includes('door')) return true;
+      return false;
+    }
+
     if(deg === 90) {
       recipe.map((item) => {
         [item.x, item.z] = [-item.z, item.x];
         item.x += z;
+        if(is_need_rotate(item.block)) {
+          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 1) % 4;
+          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        }
       });
     }
     if(deg === 180) {
@@ -79,12 +91,40 @@ const build = async (args, callback) => {
         [item.x, item.z] = [-item.x, -item.z];
         item.x += x;
         item.z += z;
+        if(is_need_rotate(item.block)) {
+          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
+          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        }
       });
     }
     if(deg === 270) {
       recipe.map((item) => {
         [item.x, item.z] = [item.z, -item.x];
         item.z += x;
+        if(is_need_rotate(item.block)) {
+          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 3) % 4;
+          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        }
+      });
+    }
+    if(deg === 45) {
+      recipe.map(item => {
+        [item.x, item.z] = [item.x, -item.z];
+        item.z += z;
+        if(is_need_rotate(item.block)) {
+          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
+          item.data = idx % 2 ? parseInt(item.data / 4) * 4 + rotate_map[idx] : item.data;
+        }
+      });
+    }
+    if(deg === 135) {
+      recipe.map(item => {
+        [item.x, item.z] = [-item.x, item.z];
+        item.x += x;
+        if(is_need_rotate(item.block)) {
+          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
+          item.data = idx % 2 ? item.data : parseInt(item.data / 4) * 4 + rotate_map[idx];
+        }
       });
     }
 
@@ -96,7 +136,7 @@ const build = async (args, callback) => {
         // console.log(recipe[i]);
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
         callback( <Progress value={i / recipe.length * 100} /> );
-        if(i % 500 === 0) {
+        if(i % 1000 === 0) {
           await sleep(500);
           // console.clear();
         }
@@ -109,15 +149,26 @@ const build = async (args, callback) => {
   let recipe = JSON.parse(await readFile(args.File).then(res => res));
 
   console.time("Build");
-  recipe = rotate(recipe, Number(args.Rotate),  Math.max(...recipe.map(x=>x.x)),  Math.max(...recipe.map(x=>x.z)));
-  if(recipe.length > 500) await slowFetch(recipe, callback);
+  const [max_x, max_y, max_z] = [Math.max(...recipe.map(x=>x.x)), Math.max(...recipe.map(x=>x.y)), Math.max(...recipe.map(x=>x.z))];
+  recipe = rotate(recipe, Number(args.Rotate),  max_x, max_z);
+  if(recipe.length > 1000) await slowFetch(recipe, callback);
   else {
     recipe.forEach(async (item, index) => {
       await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${item.x}~${item.y}~${item.z} ${item.block} ${item.data || 0}`);
-      callback(<Progress value={index / recipe.length * 100} />);
+      callback(
+        <div>
+          <span>{`(${max_x + 1}, ${max_y + 1}, ${max_z + 1})`}</span>
+          <Progress value={index / recipe.length * 100} />
+        </div>
+      );
     });
   }
-  callback(<Progress value={100} />);
+  callback(
+    <div>
+      <span>{`(${max_x}, ${max_y}, ${max_z})`}</span>
+      <Progress value={100} />
+    </div>
+  );
   console.timeEnd("Build");
 }
 

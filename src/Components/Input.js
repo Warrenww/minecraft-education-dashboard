@@ -43,6 +43,8 @@ const RotationSelect = (value, setValue, label="Rotation") => (
       <MenuItem value='90'>90°</MenuItem>
       <MenuItem value='180'>180°</MenuItem>
       <MenuItem value='270'>270°</MenuItem>
+      <MenuItem value='45'>Flip Z</MenuItem>
+      <MenuItem value='135'>Flip X</MenuItem>
     </Select>
   </FormControl>
 );
