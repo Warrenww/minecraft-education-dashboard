@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import Progress from './Components/Progress'
 
@@ -68,62 +68,99 @@ const build = async (args, callback) => {
     });
   }
   const rotate = (recipe, deg = 0, x = 1, z = 1) => {
-
     const rotate_map = [0, 2, 1, 3];
-    const is_need_rotate = (blockName) => {
-      if(blockName.includes('stairs')) return true;
-      if(blockName.includes('door')) return true;
-      return false;
+    const test_rotate = blockName => {
+      if(
+        blockName.includes('stairs') ||
+        blockName.includes('door')
+      ) return [true, 0, 1];
+      if(
+        blockName.includes('chest') ||
+        blockName.includes('furnace') ||
+        blockName.includes('smoker')
+      ) return [true, 0, -1]; // [0, 3, 1, 2]
+      if(
+        blockName.includes('terracotta') ||
+        blockName.includes('observer') ||
+        blockName.includes('dispenser') ||
+        blockName.includes('dropper')
+      ) return [true, 2, -1]; // [2, 5, 3, 4] -> [0, 3, 1, 2]
+      return [false, 0 ,0];
     }
 
     if(deg === 90) {
-      recipe.map((item) => {
+      recipe.forEach(item => {
         [item.x, item.z] = [-item.z, item.x];
         item.x += z;
-        if(is_need_rotate(item.block)) {
-          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 1) % 4;
-          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        const [is_need_rotate, shift, direction] = test_rotate(item.block);
+        if(is_need_rotate) {
+          item.data -= shift;
+          if(item.data >= 0) {
+            const idx = ((rotate_map.indexOf(Number(item.data).toString(2) & '3') + 1*direction) + 4) % 4;
+            item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+          }
+          item.data += shift;
         }
       });
     }
     if(deg === 180) {
-      recipe.map((item) => {
+      recipe.forEach(item => {
         [item.x, item.z] = [-item.x, -item.z];
         item.x += x;
         item.z += z;
-        if(is_need_rotate(item.block)) {
-          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
-          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        const [is_need_rotate, shift, direction] = test_rotate(item.block);
+        if(is_need_rotate) {
+          item.data -= shift;
+          if(item.data >= 0) {
+            const idx = ((rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2*direction) + 4) % 4;
+            item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+          }
+          item.data += shift;
         }
       });
     }
     if(deg === 270) {
-      recipe.map((item) => {
+      recipe.forEach(item => {
         [item.x, item.z] = [item.z, -item.x];
         item.z += x;
-        if(is_need_rotate(item.block)) {
-          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 3) % 4;
-          item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+        const [is_need_rotate, shift, direction] = test_rotate(item.block);
+        if(is_need_rotate) {
+          item.data -= shift;
+          if(item.data >= 0) {
+            const idx = ((rotate_map.indexOf(Number(item.data).toString(2) & '3') + 3*direction) + 4) % 4;
+            item.data = parseInt(item.data / 4) * 4 + rotate_map[idx];
+          }
+          item.data += shift;
         }
       });
     }
     if(deg === 45) {
-      recipe.map(item => {
-        [item.x, item.z] = [item.x, -item.z];
+      recipe.forEach(item => {
+        item.z =  -item.z;
         item.z += z;
-        if(is_need_rotate(item.block)) {
-          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
-          item.data = idx % 2 ? parseInt(item.data / 4) * 4 + rotate_map[idx] : item.data;
+        const [is_need_rotate, shift, direction] = test_rotate(item.block);
+        if(is_need_rotate) {
+          item.data -= shift;
+          if(item.data >= 0) {
+            const idx = ((rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2*direction) + 4) % 4;
+            item.data = idx % 2 ? parseInt(item.data / 4) * 4 + rotate_map[idx] : item.data;
+          }
+          item.data += shift;
         }
       });
     }
     if(deg === 135) {
-      recipe.map(item => {
-        [item.x, item.z] = [-item.x, item.z];
+      recipe.forEach(item => {
+        item.x = -item.x;
         item.x += x;
-        if(is_need_rotate(item.block)) {
-          const idx = (rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2) % 4;
-          item.data = idx % 2 ? item.data : parseInt(item.data / 4) * 4 + rotate_map[idx];
+        const [is_need_rotate, shift, direction] = test_rotate(item.block);
+        if(is_need_rotate) {
+          item.data -= shift;
+          if(item.data >= 0) {
+            const idx = ((rotate_map.indexOf(Number(item.data).toString(2) & '3') + 2*direction) + 4) % 4;
+            item.data = idx % 2 ? item.data : parseInt(item.data / 4) * 4 + rotate_map[idx];
+          }
+          item.data += shift;
         }
       });
     }
