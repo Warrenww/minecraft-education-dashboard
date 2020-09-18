@@ -90,6 +90,7 @@ const build = async (args, callback) => {
 
     if(deg === 90) {
       recipe.forEach(item => {
+        if(!item.block) return;
         [item.x, item.z] = [-item.z, item.x];
         item.x += z;
         const [is_need_rotate, shift, direction] = test_rotate(item.block);
@@ -105,6 +106,7 @@ const build = async (args, callback) => {
     }
     if(deg === 180) {
       recipe.forEach(item => {
+        if(!item.block) return;
         [item.x, item.z] = [-item.x, -item.z];
         item.x += x;
         item.z += z;
@@ -121,6 +123,7 @@ const build = async (args, callback) => {
     }
     if(deg === 270) {
       recipe.forEach(item => {
+        if(!item.block) return;
         [item.x, item.z] = [item.z, -item.x];
         item.z += x;
         const [is_need_rotate, shift, direction] = test_rotate(item.block);
@@ -136,6 +139,7 @@ const build = async (args, callback) => {
     }
     if(deg === 45) {
       recipe.forEach(item => {
+        if(!item.block) return;
         item.z =  -item.z;
         item.z += z;
         const [is_need_rotate, shift, direction] = test_rotate(item.block);
@@ -151,6 +155,7 @@ const build = async (args, callback) => {
     }
     if(deg === 135) {
       recipe.forEach(item => {
+        if(!item.block) return;
         item.x = -item.x;
         item.x += x;
         const [is_need_rotate, shift, direction] = test_rotate(item.block);
@@ -171,6 +176,7 @@ const build = async (args, callback) => {
     return new Promise(async function(resolve, reject) {
       for (var i = 0; i < recipe.length; i++) {
         // console.log(recipe[i]);
+        if(!recipe[i].block) continue;
         await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
         callback( <Progress value={i / recipe.length * 100} /> );
         if(i % 1000 === 0) {
@@ -191,6 +197,7 @@ const build = async (args, callback) => {
   if(recipe.length > 1000) await slowFetch(recipe, callback);
   else {
     recipe.forEach(async (item, index) => {
+      if(!item.block) return;
       await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${item.x}~${item.y}~${item.z} ${item.block} ${item.data || 0}`);
       callback(
         <div>
