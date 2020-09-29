@@ -286,11 +286,23 @@ const removeBounding = async (args, callback) => {
   callback(<Progress value={100} />);
 }
 
+const drawImage = async (recipe, setProgress) => new Promise(
+  async (resolve, reject) => {
+    await resetAgentPosition()
+    for(let i = 0; i < recipe.length; i++) {
+      await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~-1~${recipe[i].y} ${recipe[i].recipe}`);
+      setProgress(i / recipe.length * 100);
+    }
+  }
+);
+
 export {
+  sleep,
   agentInspectBlock,
   agentInspectData,
   scan,
   build,
   bounding,
   removeBounding,
+  drawImage,
 };

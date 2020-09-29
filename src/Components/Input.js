@@ -30,6 +30,7 @@ const DirectionSelect = (value, setValue, label="Direction") => (
     </Select>
   </FormControl>
 );
+
 const RotationSelect = (value, setValue, label="Rotation") => (
   <FormControl style={styles.cardInput}>
     <InputLabel>{label}</InputLabel>
@@ -46,6 +47,7 @@ const RotationSelect = (value, setValue, label="Rotation") => (
     </Select>
   </FormControl>
 );
+
 const FileChooser = (value, setValue, label="") => (
   <FormControl style={styles.cardInput}>
     <InputBase
@@ -57,7 +59,21 @@ const FileChooser = (value, setValue, label="") => (
       }}
     />
   </FormControl>
-)
+);
+
+const ImageChooser = ({value, setValue, label=""}) => (
+  <FormControl style={styles.cardInput}>
+    <InputBase
+      defaultValue=""
+      onChange={e => setValue(e.target.files[0])}
+      inputProps={{
+        accept: 'image/*',
+        type:'file',
+      }}
+    />
+  </FormControl>
+);
+
 const NumberInput = (value, setValue, label="Number") => (
   <TextField
     style={styles.cardInput}
@@ -68,11 +84,12 @@ const NumberInput = (value, setValue, label="Number") => (
     variant="outlined"
     size="small"
   />
-)
+);
 
 export {
   DirectionSelect,
   RotationSelect,
   FileChooser,
   NumberInput,
+  ImageChooser,
 }

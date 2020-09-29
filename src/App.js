@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import styled from 'styled-components';
 import CommandBlock from './Components/CommandBlock';
+import DrawingBlock from './Components/DrawingBlock';
 import {
   DirectionSelect,
   RotationSelect,
@@ -82,6 +83,7 @@ function App() {
           label={['File', 'Rotate']}
           inputArea={[FileChooser, RotationSelect]}
         />
+        <DrawingBlock />
       </Content>
     </div>
   );
