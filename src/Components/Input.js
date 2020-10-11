@@ -74,6 +74,19 @@ const ImageChooser = ({value, setValue, label=""}) => (
   </FormControl>
 );
 
+const VideoChooser = ({value, setValue, label=""}) => (
+  <FormControl style={styles.cardInput}>
+    <InputBase
+      defaultValue=""
+      onChange={e => setValue(e.target.files[0])}
+      inputProps={{
+        accept: 'video/*',
+        type:'file',
+      }}
+    />
+  </FormControl>
+);
+
 const NumberInput = (value, setValue, label="Number") => (
   <TextField
     style={styles.cardInput}
@@ -92,4 +105,5 @@ export {
   FileChooser,
   NumberInput,
   ImageChooser,
+  VideoChooser,
 }

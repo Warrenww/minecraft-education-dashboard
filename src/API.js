@@ -293,12 +293,43 @@ const removeBounding = async (args, callback) => {
   callback(<Progress value={100} />);
 }
 
-const drawImage = async (recipe, setProgress) => new Promise(
+const drawImage = async (recipe, config, setProgress) => new Promise(
   async (resolve, reject) => {
-    await resetAgentPosition()
+    await resetAgentPosition();
+    const max_w = Math.max(...recipe.map(x => x.x));
+    const max_h = Math.max(...recipe.map(x => x.y));
+    switch (config.facing) {
+      case 'x':
+        recipe = recipe.map(tmp => ({
+          ...tmp,
+          x: -1,
+          y: parseInt(max_h - tmp.y),
+          z: parseInt(max_w - tmp.x),
+        }));
+        break;
+      case 'y':
+        recipe = recipe.map(tmp => ({
+          ...tmp,
+          x: parseInt(max_w - tmp.x),
+          y: -1,
+          z: parseInt(max_h - tmp.y),
+        }));
+        break;
+      case 'z':
+        recipe = recipe.map(tmp => ({
+          ...tmp,
+          x: parseInt(max_w - tmp.x),
+          y: parseInt(max_h - tmp.y),
+          z: -1,
+        }));
+        break;
+      default:
+        reject();
+    }
     for(let i = 0; i < recipe.length; i++) {
-      await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~-1~${recipe[i].y} ${recipe[i].recipe}`);
-      setProgress(i / recipe.length * 100);
+      fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].recipe}`);
+      // setProgress(i / recipe.length * 100);
+      await sleep(10);
     }
   }
 );

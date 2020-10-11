@@ -6,12 +6,16 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import TextField from '@material-ui/core/TextField';
-import { ImageChooser } from './Input';
+import { ImageChooser, VideoChooser } from './Input';
 import ColorSet from '../Constants/ColorSet';
 import Progress from './Progress';
 import { drawImage } from '../API';
-
-
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 const rgb2hsl = ([r, g, b]) => {
 			r = parseFloat(r) / 255;
@@ -140,9 +144,11 @@ const hex2rgb = (hex) => {
 const styles = {
   input: {
     marginBottom: 10,
-  }
+  },
+	cardInput: {
+		width: '50%',
+	}
 };
-
 
 const Canvas = ({
   width,
@@ -182,20 +188,42 @@ const Canvas = ({
     }
     ctx.putImageData(Imgdata, 0, 0);
     setRecipe(recipe);
-  }, [width, height, image]);
+  }, []);
   return (
     <canvas id='canvas'></canvas>
   );
 };
 
+const VideoCanvas = ({config}) => {
+	useEffect(() => {
+		const video = document.getElementById('video');
+		const canvas = document.getElementById('canvas');
+		console.log(video)
+	},[])
+
+	return (
+		<>
+		 	<video id='video' src={config.url} style={{width: config.width * config.ratio}} alt=''/>
+			<canvas id='canvas'></canvas>
+		</>
+	);
+}
+
 const DrawingBlock = (props) => {
   const [img, setImg] = useState(null);
+  const [video, setVideo] = useState(null);
+	const [isVideo, setTabValue] = useState(0);
   const [imgConfig, setImgConfig] = useState({
     width: 0,
     height: 0,
     url:'',
     image: null,
+		video: null,
     ratio: 1,
+		facing: 'y',
+		pick: 5,
+		start: 0,
+		end: 0,
   });
   const [recipe, setRecipe] = useState([]);
   const [progress, setProgress] = useState(0);
@@ -217,22 +245,46 @@ const DrawingBlock = (props) => {
     };
     image.src = objectUrl;
   }
+	const handleVideoChange = file => {
+		setVideo(file);
+		let objectUrl = URL.createObjectURL(file);
+		setImgConfig({...imgConfig,
+			url:objectUrl,
+		});
+	}
+	useEffect(() => {
+		let video = document.getElementById('video');
+		if (video) {
+			video.oncanplay  = () => {
+				setImgConfig({...imgConfig,
+					width: video.videoWidth,
+					height: video.videoHeight,
+					end: parseInt(video.duration),
+				});
+			}
+		}
+	},[video]);
 
   const steps = [
-    'Choose Image',
+    `Choose ${isVideo ? 'Video' : 'Image'}`,
     'Config properties',
-    'Generating Image'
+    `Generating ${isVideo ? 'Video' : 'Image'}`
   ];
   const getContent = step => {
     switch (step) {
       case 0:
         return (
           <div>
-            <ImageChooser
-              value={img}
-              setValue={handleImgChange}
-            />
-            {img ? <img src={imgConfig.url} style={{width: '100%'}} alt='' /> : <></>}
+						{
+								isVideo
+									? <VideoChooser value={img} setValue={handleVideoChange} />
+									: <ImageChooser value={img} setValue={handleImgChange} />
+						}
+						{
+							isVideo
+								? (video ? <video id='video' src={imgConfig.url} style={{width: '100%'}} alt='' controls/> : <></>)
+								: (img ? <img src={imgConfig.url} style={{width: '100%'}} alt='' /> : <></>)
+						}
             <div>{imgConfig.width} × {imgConfig.height}</div>
           </div>
         );
@@ -240,18 +292,9 @@ const DrawingBlock = (props) => {
         return (
           <div>
             <TextField
-              label='Ratio'
-              value={imgConfig.ratio}
-              onChange={e => setImgConfig({...imgConfig, ratio: e.target.value})}
-              type='number'
-              variant="outlined"
-              size="small"
-              style={styles.input}
-            />
-            <TextField
               label='Width'
               value={imgConfig.width * imgConfig.ratio}
-              onChange={e => setImgConfig({...imgConfig, ratio: e.target.value / imgConfig.width})}
+              onChange={e => setImgConfig({...imgConfig, ratio: parseInt(e.target.value) / imgConfig.width})}
               type='number'
               variant="outlined"
               size="small"
@@ -260,16 +303,62 @@ const DrawingBlock = (props) => {
             <TextField
               label='Height'
               value={imgConfig.height * imgConfig.ratio}
-              onChange={e => setImgConfig({...imgConfig, ratio: e.target.value / imgConfig.height})}
+              onChange={e => setImgConfig({...imgConfig, ratio: parseInt(e.target.value) / imgConfig.height})}
               type='number'
               variant="outlined"
               size="small"
               style={styles.input}
             />
+						{
+							isVideo ?
+								<>
+									<TextField
+										label='Pick rate'
+										value={imgConfig.pick}
+										onChange={e => setImgConfig({...imgConfig, pick: parseInt(e.target.value)})}
+										type='number'
+										variant="outlined"
+										size="small"
+										style={styles.input}
+									/>
+									<TextField
+										label='Start time'
+										value={imgConfig.start}
+										onChange={e => setImgConfig({...imgConfig, start: parseInt(e.target.value)})}
+										type='number'
+										variant="outlined"
+										size="small"
+										style={styles.input}
+									/>
+									<TextField
+										label='End time'
+										value={imgConfig.end}
+										onChange={e => setImgConfig({...imgConfig, end: parseInt(e.target.value)})}
+										type='number'
+										variant="outlined"
+										size="small"
+										style={styles.input}
+									/>
+								</>
+								: null
+						}
+						<FormControl style={{...styles.cardInput, ...styles.input}}>
+							<InputLabel>Facing</InputLabel>
+							<Select
+								value={imgConfig.facing}
+								onChange={e => setImgConfig({...imgConfig, facing: e.target.value})}
+							>
+								<MenuItem value='x'>x</MenuItem>
+								<MenuItem value='y'>y</MenuItem>
+								<MenuItem value='z'>z</MenuItem>
+							</Select>
+						</FormControl>
           </div>
         );
       case 2:
         return (
+					isVideo ?
+					<VideoCanvas config={imgConfig} /> :
           <Canvas
             width={imgConfig.width* imgConfig.ratio}
             height={imgConfig.height* imgConfig.ratio}
@@ -284,12 +373,41 @@ const DrawingBlock = (props) => {
 
   const buildImage = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    drawImage(recipe, setProgress);
+    drawImage(recipe, imgConfig, setProgress);
   }
+
+	const handleTabChange = (e, v) => {
+		setTabValue(v);
+		setImgConfig({
+	    width: 0,
+	    height: 0,
+	    url:'',
+	    image: null,
+			video: null,
+	    ratio: 1,
+			facing: 'y',
+			pick: 5,
+			start: 0,
+			end: 0,
+	  });
+		setImg(null);
+		setVideo(null);
+		setRecipe([]);
+		setActiveStep(0);
+	}
 
   return (
     <Card style={{width: 450}}>
+			<Tabs
+				value={isVideo}
+				onChange={handleTabChange}
+				variant="fullWidth"
+			>
+				<Tab label='Draw Image' key={0} />
+				<Tab label='Generate Video' key={1} />
+			</Tabs>
       <CardContent>
+				<h3>Import {isVideo? 'Video' : 'Image'}</h3>
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((label) => (
             <Step key={label}>
@@ -317,7 +435,12 @@ const DrawingBlock = (props) => {
                   >
                     Back
                   </Button>
-                  <Button variant="contained" color="primary" onClick={activeStep === steps.length - 1 ? buildImage : handleNext}>
+                  <Button
+										variant="contained"
+										color="primary"
+										onClick={activeStep === steps.length - 1 ? buildImage : handleNext}
+										disabled={img === null && video === null}
+									>
                     {activeStep === steps.length - 1 ? 'Generate' : 'Next'}
                   </Button>
                 </div>
