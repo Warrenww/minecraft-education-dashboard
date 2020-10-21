@@ -17,97 +17,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-const rgb2hsl = ([r, g, b]) => {
-			r = parseFloat(r) / 255;
-			g = parseFloat(g) / 255;
-			b = parseFloat(b) / 255;
-
-		 	const M = Math.max(r,g,b);
-      const m = Math.min(r,g,b);
-      const d = M-m;
-
-      let h, s, l;
-      if( d === 0 ) h = 0;
-      else if( M === r ) h = ((g - b) / d) % 6;
-      else if( M === g ) h = (b - r) / d + 2;
-      else h = (r - g) / d + 4;
-
-      h *= 60;
-      if( h < 0 ) h += 360;
-      l = (M + m) / 2;
-      if( d === 0 ) s = 0;
-      else s = d / (1 - Math.abs (2 * l - 1));
-      s *= 100;
-      l *= 100;
-      return [Math.round(h) ,Math.round(s) ,Math.round(l)];
-};
-const hsl2rgb = ([h, s, l]) => {
-		h = parseFloat(h);
-		s = parseFloat(s);
-		l = parseFloat(l);
-		if( h < 0 ) h = 0;
-		if( s < 0 ) s = 0;
-		if( l < 0 ) l = 0;
-		if( h >= 360 ) h = 359;
-		if( s > 100 ) s = 100;
-		if( l > 100 ) l = 100;
-		s /= 100;
-		l /= 100;
-		const C = (1 - Math.abs(2 * l - 1)) * s;
-		const hh = h / 60;
-		const X = C * (1 - Math.abs(hh % 2 - 1));
-		let r = 0, g = 0, b = 0;
-		if( hh >= 0 && hh < 1 )
-		{
-			r = C;
-			g = X;
-		}
-		else if( hh >= 1 && hh < 2 )
-		{
-			r = X;
-			g = C;
-		}
-		else if( hh >= 2 && hh < 3 )
-		{
-			g = C;
-			b = X;
-		}
-		else if( hh >= 3 && hh < 4 )
-		{
-			g = X;
-			b = C;
-		}
-		else if( hh >= 4 && hh < 5 )
-		{
-			r = X;
-			b = C;
-		}
-		else
-		{
-			r = C;
-			b = X;
-		}
-		const m = l - C / 2;
-		r += m;
-		g += m;
-		b += m;
-		r *= 255.0;
-		g *= 255.0;
-		b *= 255.0;
-		r = Math.round(r);
-		g = Math.round(g);
-		b = Math.round(b);
-    return [r, g, b];
-};
-const rgb2hex = ([r, g, b]) => {
-  let hex = r*65536+g*256+b;
-  hex = hex.toString(16,6);
-  const len = hex.length;
-  if (len < 6) for(let i=0; i<6-len; i++) hex = '0'+hex;
-  return hex;
-};
 const hex2rgb = (hex) => {
-  let [r, g, b, a] = [0, 0, 0, 0];
+  let [r, g, b, a] = [0, 0, 0, 1];
   if( hex === "" ) hex = "000000";
   if( hex.charAt(0) === "#" ) hex = hex.substring(1, hex.length);
   if( hex.length !== 6 && hex.length !== 8 && hex.length !== 3 )
@@ -138,7 +49,7 @@ const hex2rgb = (hex) => {
   r = parseInt(r, 16);
   g = parseInt(g, 16);
   b = parseInt(b, 16);
-  return [r, g, b];
+  return [r, g, b, a];
 };
 
 const styles = {

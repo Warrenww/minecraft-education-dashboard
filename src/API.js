@@ -172,21 +172,6 @@ const build = async (args, callback) => {
 
     return recipe;
   }
-  const slowFetch = (recipe, callback) => {
-    return new Promise(async function(resolve, reject) {
-      for (var i = 0; i < recipe.length; i++) {
-        // console.log(recipe[i]);
-        if(!recipe[i].block) continue;
-        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
-        callback( <Progress value={i / recipe.length * 100} /> );
-        if(i % 1000 === 0) {
-          await sleep(500);
-          // console.clear();
-        }
-      }
-      resolve();
-    });
-  }
 
   await resetAgentPosition({offsetX: 1, offsetZ: 1, facingZ: 1});
   let recipe = JSON.parse(await readFile(args.File).then(res => res));
@@ -194,22 +179,15 @@ const build = async (args, callback) => {
   console.time("Build");
   const [max_x, max_y, max_z] = [Math.max(...recipe.map(x=>x.x)), Math.max(...recipe.map(x=>x.y)), Math.max(...recipe.map(x=>x.z))];
   recipe = rotate(recipe, Number(args.Rotate),  max_x, max_z);
-  if(recipe.length > 1000) await slowFetch(recipe, callback);
-  else {
-    recipe.forEach(async (item, index) => {
-      if(!item.block) return;
-      await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${item.x}~${item.y}~${item.z} ${item.block} ${item.data || 0}`);
-      callback(
-        <div>
-          <span>{`(${max_x + 1}, ${max_y + 1}, ${max_z + 1})`}</span>
-          <Progress value={index / recipe.length * 100} />
-        </div>
-      );
-    });
+  for (let i = 0; i < recipe.length; i++) {
+    if(!recipe[i].block) continue;
+    fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
+    callback( <Progress value={i / recipe.length * 100} /> );
+    await sleep(10);
   }
   callback(
     <div>
-      <span>{`(${max_x}, ${max_y}, ${max_z})`}</span>
+      {/*<span>{`(${max_x}, ${max_y}, ${max_z})`}</span>*/}
       <Progress value={100} />
     </div>
   );
@@ -326,11 +304,13 @@ const drawImage = async (recipe, config, setProgress) => new Promise(
       default:
         reject();
     }
+    console.time('Draw');
     for(let i = 0; i < recipe.length; i++) {
       fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].recipe}`);
       // setProgress(i / recipe.length * 100);
       await sleep(10);
     }
+    console.timeEnd('Draw');
   }
 );
 
