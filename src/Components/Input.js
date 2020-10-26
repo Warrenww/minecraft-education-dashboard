@@ -5,7 +5,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-
+import Blocks from '../Constants/Blocks';
 
 const styles = {
   cardInput: {
@@ -44,6 +44,19 @@ const RotationSelect = (value, setValue, label="Rotation") => (
       <MenuItem value='270'>270°</MenuItem>
       <MenuItem value='45'>Flip Z</MenuItem>
       <MenuItem value='135'>Flip X</MenuItem>
+    </Select>
+  </FormControl>
+);
+const BLockSelect = (value, setValue, label="Block") => (
+  <FormControl style={styles.cardInput}>
+    <InputLabel>{label}</InputLabel>
+    <Select
+      value={value}
+      onChange={e => setValue(e.target.value)}
+    >
+      {
+        Object.entries(Blocks).map(x => <MenuItem value={x[0]} key={x[0]}>{x[1]}</MenuItem>)
+      }
     </Select>
   </FormControl>
 );
@@ -106,4 +119,5 @@ export {
   NumberInput,
   ImageChooser,
   VideoChooser,
+  BLockSelect
 }

@@ -314,6 +314,35 @@ const drawImage = async (recipe, config, setProgress) => new Promise(
   }
 );
 
+const island = async (args, callback) => {
+  const {block, radius, deep, random} = args;
+  await resetAgentPosition();
+
+  const circle = r => {
+    const result = [];
+    for (let x = 0; x <= r; x++) {
+      for (let y = 0; y < Math.round((r*r - x*x)**0.5 + Math.random() * random); y++) {
+        result.push([x,y]);
+        result.push([-x,y]);
+        result.push([x,-y]);
+        result.push([-x,-y]);
+      }
+    }
+    return result;
+  }
+
+  const func = x => radius / deep**2 * (x - deep)**2;
+
+  for (let h = 0; h < deep; h ++) {
+    const r = func(h);
+    const recipe = circle(Math.round(r)).map(t => [t[0], -h, t[1]]);
+    for (let [x,y,z] of recipe) {
+      fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~ ~ ~ setblock ~${x} ~${y - 1} ~${z} ${block || 'stone'}`);
+      await sleep(10);
+    }
+  }
+
+}
 export {
   sleep,
   agentInspectBlock,
@@ -323,4 +352,5 @@ export {
   bounding,
   removeBounding,
   drawImage,
+  island,
 };

@@ -8,6 +8,7 @@ import {
   RotationSelect,
   FileChooser,
   NumberInput,
+  BLockSelect
 } from './Components/Input';
 import {
   agentInspectBlock,
@@ -16,6 +17,7 @@ import {
   build,
   bounding,
   removeBounding,
+  island,
 } from './API';
 
 const Content = styled.div`
@@ -84,6 +86,14 @@ function App() {
           inputArea={[FileChooser, RotationSelect]}
         />
         <DrawingBlock />
+        <CommandBlock
+          title={["Island Generator"]}
+          description={["Generate an island with given radius, deepneth, and block."]}
+          action={[island]}
+          defaultValue={['air', 10, 15, 0]}
+          label={['block', 'radius', 'deep', 'random']}
+          inputArea={[BLockSelect, NumberInput, NumberInput, NumberInput]}
+        />
       </Content>
     </div>
   );
