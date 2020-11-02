@@ -13,9 +13,9 @@ const resetAgentPosition = (args = {}) => {
 }
 
 const scan = async (args, callback) => {
-  await resetAgentPosition({offsetX: 1, offsetY: -1, offsetZ: 1, facingZ: 1});
-  const blocks = [];
   const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
+  await resetAgentPosition({offsetX: 1, offsetY: sizeY + 1, offsetZ: 1, facingZ: 1});
+  const blocks = [];
   await fetch(`http://localhost:8080/tptargettopos?victim=@p&destination=~${parseInt(sizeX / 2)}~${parseInt(sizeY / 2)}~${parseInt(sizeZ / 2)}`);
   let flag_x = 1;
   let flag_z = 1;
@@ -26,16 +26,16 @@ const scan = async (args, callback) => {
       for(let x = 0 ; x < sizeX; x ++){
         x && await fetch(`http://localhost:8080/move?direction=${flag_x?'left':'right'}`);
 
-        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
-        const block = await fetch("http://localhost:8080/inspect?direction=up").then(res => res.json()).then(result => result);
+        // await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
+        const block = await fetch("http://localhost:8080/inspect?direction=down").then(res => res.json()).then(result => result);
         callback(<Progress value={(y * sizeZ * sizeX + z * sizeX + x) / (sizeX * sizeY * sizeZ) * 100} />);
         if(block.blockName === 'air') continue;
-        const data = await fetch("http://localhost:8080/inspectdata?direction=up").then(res => res.json()).then(result => result);
-        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~~1~ air`);
+        const data = await fetch("http://localhost:8080/inspectdata?direction=down").then(res => res.json()).then(result => result);
+        await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~~-1~ air`);
 
         blocks.push({
           x: flag_x ? x : sizeX - x - 1,
-          y: y,
+          y: sizeY - y - 1,
           z: flag_z ? z : sizeZ - z - 1,
           block: block.blockName,
           data: data.data,
@@ -43,11 +43,10 @@ const scan = async (args, callback) => {
       }
       flag_x ^= 1;
     }
-    await fetch("http://localhost:8080/move?direction=up");
-
+    await fetch("http://localhost:8080/move?direction=down");
     flag_z ^= 1;
   }
-  blocks.length < 50 && console.table( blocks);
+  blocks.length < 50 && console.table(blocks);
   console.timeEnd("scan");
   const downloadURL = await URL.createObjectURL(new Blob([JSON.stringify(blocks)], {type : 'application/json'}));
   callback(
