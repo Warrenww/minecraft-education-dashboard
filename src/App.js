@@ -18,7 +18,18 @@ import {
   bounding,
   removeBounding,
   island,
+  moveAgent,
+  resetAgentPosition,
 } from './API';
+
+import { Button, Card, Grid } from '@material-ui/core';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import VerticalAlignBottomIcon from '@material-ui/icons/VerticalAlignBottom';
+import VerticalAlignTopIcon from '@material-ui/icons/VerticalAlignTop';
+import RoomIcon from '@material-ui/icons/Room';
 
 const Content = styled.div`
   display: flex;
@@ -54,6 +65,32 @@ function App() {
   return (
     <div className="App">
       <Content>
+        <Card>
+          <h2>Move agent</h2>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Button onClick={() => moveAgent('forward')}><KeyboardArrowUpIcon /></Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button onClick={() => moveAgent('left')}><KeyboardArrowLeftIcon /></Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button onClick={() => resetAgentPosition()}><RoomIcon /></Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button onClick={() => moveAgent('right')}><KeyboardArrowRightIcon /></Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Button onClick={() => moveAgent('back')}><KeyboardArrowDownIcon /></Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button onClick={() => moveAgent('down')}><VerticalAlignBottomIcon /></Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button onClick={() => moveAgent('up')}><VerticalAlignTopIcon /></Button>
+            </Grid>
+          </Grid>
+        </Card>
         <CommandBlock
           title={["Agen Inspet Block", "Agen Inspet Data"]}
           description={[

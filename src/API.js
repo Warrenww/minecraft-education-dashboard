@@ -13,6 +13,11 @@ const resetAgentPosition = (args = {}) => {
   });
 }
 
+const moveAgent = (direction = 'forward') => (new Promise(async function(resolve, reject) {
+  await fetch(`http://localhost:8080/move?direction=${direction}`);
+  resolve();
+}));
+
 const scan = async (args, callback) => {
   const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
   await resetAgentPosition({offsetX: 1, offsetY: sizeY, offsetZ: 1, facingZ: 1});
@@ -23,9 +28,9 @@ const scan = async (args, callback) => {
   console.time("scan");
   for(let y = 0 ; y < sizeY; y ++){
     for(let z = 0 ; z < sizeZ; z ++){
-      z && await fetch(`http://localhost:8080/move?direction=${flag_z?'forward' : 'back'}`);
+      z && await moveAgent(flag_z ? 'forward' : 'back');
       for(let x = 0 ; x < sizeX; x ++){
-        x && await fetch(`http://localhost:8080/move?direction=${flag_x?'left':'right'}`);
+        x && await moveAgent(flag_x ? 'left' : 'right');
 
         // await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ fill ~-1~~-1 ~1~~1 air`);
         const block = await fetch("http://localhost:8080/inspect?direction=down").then(res => res.json()).then(result => result);
@@ -44,7 +49,7 @@ const scan = async (args, callback) => {
       }
       flag_x ^= 1;
     }
-    await fetch("http://localhost:8080/move?direction=down");
+    await moveAgent('down');
     flag_z ^= 1;
   }
   blocks.length < 50 && console.table(blocks);
@@ -188,7 +193,7 @@ const build = async (args, callback) => {
       recipe[i].block.includes('repeater') ||
       recipe[i].block.includes('pressure_plate') ||
       recipe[i].block.includes('comparator') ||
-      recipe[i].block.includes('button') || 
+      recipe[i].block.includes('button') ||
       recipe[i].block.includes('lever')) {
       waitingQueue.push(recipe[i]);
       continue;
@@ -370,4 +375,6 @@ export {
   removeBounding,
   drawImage,
   island,
+  moveAgent,
+  resetAgentPosition,
 };
