@@ -7,6 +7,7 @@ const sleep = (ms) => new Promise((resolve, reject) => setTimeout(resolve, ms));
 const resetAgentPosition = (args = {}) => {
   const {offsetX, offsetY, offsetZ, facingX, facingZ} = args;
   return new Promise(async function(resolve, reject) {
+    console.log(args)
     await fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=tp @c ~${offsetX || 0} ~${offsetY || 0} ~${offsetZ || 0} facing ~${(offsetX || 0) + (facingX || 0) * 2} ~ ~${(offsetZ || 0) + (facingZ || 0) * 2}`);
     resolve()
   });
@@ -14,7 +15,7 @@ const resetAgentPosition = (args = {}) => {
 
 const scan = async (args, callback) => {
   const [sizeX, sizeY, sizeZ] = [args.SizeX, args.SizeY, args.SizeZ];
-  await resetAgentPosition({offsetX: 1, offsetY: sizeY + 1, offsetZ: 1, facingZ: 1});
+  await resetAgentPosition({offsetX: 1, offsetY: sizeY, offsetZ: 1, facingZ: 1});
   const blocks = [];
   await fetch(`http://localhost:8080/tptargettopos?victim=@p&destination=~${parseInt(sizeX / 2)}~${parseInt(sizeY / 2)}~${parseInt(sizeZ / 2)}`);
   let flag_x = 1;
@@ -178,10 +179,27 @@ const build = async (args, callback) => {
   console.time("Build");
   const [max_x, max_y, max_z] = [Math.max(...recipe.map(x=>x.x)), Math.max(...recipe.map(x=>x.y)), Math.max(...recipe.map(x=>x.z))];
   recipe = rotate(recipe, Number(args.Rotate),  max_x, max_z);
+  const waitingQueue = [];
   for (let i = 0; i < recipe.length; i++) {
     if(!recipe[i].block) continue;
+    if(
+      recipe[i].block.includes('redstone') ||
+      recipe[i].block.includes('torch') ||
+      recipe[i].block.includes('repeater') ||
+      recipe[i].block.includes('pressure_plate') ||
+      recipe[i].block.includes('comparator') ||
+      recipe[i].block.includes('button') || 
+      recipe[i].block.includes('lever')) {
+      waitingQueue.push(recipe[i]);
+      continue;
+    }
     fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${recipe[i].x}~${recipe[i].y}~${recipe[i].z} ${recipe[i].block} ${recipe[i].data || 0}`);
     callback( <Progress value={i / recipe.length * 100} /> );
+    await sleep(10);
+  }
+  await sleep(100);
+  for (let i = 0; i < waitingQueue.length; i++) {
+    fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${waitingQueue[i].x}~${waitingQueue[i].y}~${waitingQueue[i].z} ${waitingQueue[i].block} ${waitingQueue[i].data || 0}`);
     await sleep(10);
   }
   callback(
