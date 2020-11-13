@@ -180,6 +180,25 @@ const build = async (args, callback) => {
 
   await resetAgentPosition({offsetX: 1, offsetZ: 1, facingZ: 1});
   let recipe = JSON.parse(await readFile(args.File).then(res => res));
+  const check_await = (blockName) => {
+    const check_list = [
+      'redstone',
+      'torch',
+      'repeater',
+      'pressure_plate',
+      'comparator',
+      'button',
+      'water',
+      'lava',
+      'lantern',
+      '_sign',
+      'lever',
+    ];
+    for (let i of check_list) {
+      if (blockName.includes(i)) return true;
+    }
+    return false;
+  }
 
   console.time("Build");
   const [max_x, max_y, max_z] = [Math.max(...recipe.map(x=>x.x)), Math.max(...recipe.map(x=>x.y)), Math.max(...recipe.map(x=>x.z))];
@@ -187,14 +206,7 @@ const build = async (args, callback) => {
   const waitingQueue = [];
   for (let i = 0; i < recipe.length; i++) {
     if(!recipe[i].block) continue;
-    if(
-      recipe[i].block.includes('redstone') ||
-      recipe[i].block.includes('torch') ||
-      recipe[i].block.includes('repeater') ||
-      recipe[i].block.includes('pressure_plate') ||
-      recipe[i].block.includes('comparator') ||
-      recipe[i].block.includes('button') ||
-      recipe[i].block.includes('lever')) {
+    if(check_await(recipe[i].block)) {
       waitingQueue.push(recipe[i]);
       continue;
     }
