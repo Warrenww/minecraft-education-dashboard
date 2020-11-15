@@ -192,6 +192,12 @@ const build = async (args, callback) => {
       'lava',
       'lantern',
       '_sign',
+      'frame',
+      'rail',
+      'tripwire',
+      'sand',
+      'gravel',
+      'carpet',
       'lever',
     ];
     for (let i of check_list) {
