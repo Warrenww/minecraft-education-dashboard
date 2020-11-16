@@ -199,6 +199,10 @@ const build = async (args, callback) => {
       'gravel',
       'carpet',
       'lever',
+      'cactus',
+      'banners',
+      'flower',
+      'sapling',
     ];
     for (let i of check_list) {
       if (blockName.includes(i)) return true;
@@ -223,6 +227,7 @@ const build = async (args, callback) => {
   await sleep(100);
   for (let i = 0; i < waitingQueue.length; i++) {
     fetch(`http://localhost:8080/executeasother?origin=@p&position=~ ~ ~&command=execute @c ~~~ setblock ~${waitingQueue[i].x}~${waitingQueue[i].y}~${waitingQueue[i].z} ${waitingQueue[i].block} ${waitingQueue[i].data || 0}`);
+    callback( <Progress value={i / waitingQueue.length * 100} /> );
     await sleep(10);
   }
   callback(
